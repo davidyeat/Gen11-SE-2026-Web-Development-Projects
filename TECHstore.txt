@@ -1,0 +1,878 @@
+import { useState, useEffect, useMemo } from "react";
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  { id: 1, name: "MacBook Pro 16\"", category: "Laptops", price: 2499, rating: 4.9, reviews: 312, img: "💻", badge: "Best Seller", desc: "Apple M3 Pro chip, 18GB RAM, 512GB SSD. The ultimate pro laptop for creators and developers.", specs: ["M3 Pro Chip", "18GB RAM", "512GB SSD", "16.2\" Liquid Retina"] },
+  { id: 2, name: "Dell XPS 15", category: "Laptops", price: 1799, rating: 4.7, reviews: 208, img: "🖥️", badge: "Top Rated", desc: "Intel Core i9, 32GB RAM, NVIDIA RTX 4060. Perfect for power users and creatives.", specs: ["Intel i9-13900H", "32GB DDR5", "1TB NVMe", "OLED 3.5K Display"] },
+  { id: 3, name: "ASUS ROG Zephyrus", category: "Laptops", price: 1599, rating: 4.6, reviews: 175, img: "🎮", badge: "Gaming", desc: "AMD Ryzen 9, RTX 4070, 165Hz display. Dominate every game.", specs: ["Ryzen 9 7945HX", "16GB DDR5", "RTX 4070", "165Hz QHD"] },
+  { id: 4, name: "iPhone 15 Pro Max", category: "Smartphones", price: 1199, rating: 4.9, reviews: 541, img: "📱", badge: "New", desc: "A17 Pro chip, 48MP camera system, titanium design. The most powerful iPhone ever.", specs: ["A17 Pro Chip", "48MP Triple Camera", "USB-C 3.0", "Titanium Frame"] },
+  { id: 5, name: "Samsung Galaxy S24 Ultra", category: "Smartphones", price: 1299, rating: 4.8, reviews: 423, img: "📲", badge: "Hot", desc: "200MP camera, built-in S Pen, Galaxy AI features. The Android flagship redefined.", specs: ["Snapdragon 8 Gen 3", "200MP Camera", "S Pen Included", "12GB RAM"] },
+  { id: 6, name: "Google Pixel 8 Pro", category: "Smartphones", price: 999, rating: 4.7, reviews: 287, img: "🤳", badge: null, desc: "Google Tensor G3, best-in-class computational photography, 7 years of updates.", specs: ["Tensor G3 Chip", "50MP + 48MP + 48MP", "7yr Updates", "Temperature Sensor"] },
+  { id: 7, name: "OnePlus 12", category: "Smartphones", price: 799, rating: 4.5, reviews: 189, img: "📳", badge: "Value", desc: "Snapdragon 8 Gen 3, 100W charging, Hasselblad cameras.", specs: ["Snapdragon 8 Gen 3", "100W SuperVOOC", "Hasselblad Camera", "16GB RAM"] },
+  { id: 8, name: "Sony WH-1000XM5", category: "Accessories", price: 349, rating: 4.8, reviews: 634, img: "🎧", badge: "Award Winner", desc: "Industry-leading noise cancellation, 30hr battery, crystal clear calls.", specs: ["30hr Battery", "8 Microphones", "LDAC Codec", "Multipoint Connect"] },
+  { id: 9, name: "Logitech MX Master 3S", category: "Accessories", price: 99, rating: 4.7, reviews: 892, img: "🖱️", badge: null, desc: "8K DPI sensor, whisper-quiet clicks, multi-device flow. The ultimate productivity mouse.", specs: ["8K DPI Sensor", "Quiet Clicks", "USB-C Charging", "Flow Multi-Device"] },
+  { id: 10, name: "Keychron K8 Pro", category: "Accessories", price: 119, rating: 4.6, reviews: 445, img: "⌨️", badge: "Popular", desc: "Hot-swappable mechanical keyboard, RGB backlight, Bluetooth 5.1.", specs: ["Hot-Swappable", "RGB Backlight", "BT 5.1 + USB-C", "Gateron G Pro"] },
+  { id: 11, name: "LG 27\" 4K Monitor", category: "Accessories", price: 449, rating: 4.6, reviews: 312, img: "🖥️", badge: null, desc: "IPS Nano Color, 99% DCI-P3, USB-C 96W charging. For color-critical work.", specs: ["27\" IPS Nano", "4K 3840×2160", "USB-C 96W", "99% DCI-P3"] },
+  { id: 12, name: "Razer DeathAdder V3", category: "Gaming", price: 89, rating: 4.8, reviews: 1203, img: "🖱️", badge: "Esports", desc: "Focus Pro 30K sensor, 90hr battery, ergonomic design for long sessions.", specs: ["Focus Pro 30K", "90hr Battery", "30K DPI", "Hyper Speed 2.4GHz"] },
+  { id: 13, name: "SteelSeries Arctis Nova Pro", category: "Gaming", price: 349, rating: 4.7, reviews: 567, img: "🎮", badge: null, desc: "Hi-Res audio, dual wireless, active noise cancellation, hot-swap battery.", specs: ["Hi-Res Certified", "Dual Wireless", "ANC", "Hot-Swap Battery"] },
+  { id: 14, name: "ASUS ROG Swift 360Hz", category: "Gaming", price: 699, rating: 4.7, reviews: 298, img: "🖥️", badge: "360Hz", desc: "360Hz IPS, G-SYNC, 1ms response. Built for competitive gaming.", specs: ["360Hz IPS", "G-SYNC Ultimate", "1ms Response", "24.5\" FHD"] },
+  { id: 15, name: "Apple Watch Ultra 2", category: "Smart Devices", price: 799, rating: 4.8, reviews: 421, img: "⌚", badge: "Ultra", desc: "Titanium case, precision dual-frequency GPS, 60hr battery life. Built for adventure.", specs: ["S9 SiP Chip", "Dual-Freq GPS", "60hr Battery", "Titanium Case"] },
+  { id: 16, name: "Samsung Galaxy Watch 6", category: "Smart Devices", price: 299, rating: 4.6, reviews: 334, img: "⌚", badge: null, desc: "Advanced health sensors, sleep coaching, Wear OS 4. Your health companion.", specs: ["Exynos W930", "BioActive Sensor", "40hr Battery", "Wear OS 4"] },
+  { id: 17, name: "Amazon Echo Show 10", category: "Smart Devices", price: 249, rating: 4.5, reviews: 789, img: "📟", badge: null, desc: "10\" HD display that moves to face you, Alexa, home hub. Smart home center.", specs: ["10\" HD Display", "Alexa Built-in", "Zigbee Hub", "Motion Tracking"] },
+  { id: 18, name: "Google Nest Hub Max", category: "Smart Devices", price: 229, rating: 4.4, reviews: 612, img: "🔊", badge: null, desc: "10\" display, Google Assistant, Face Match, Nest camera. Smart home hub.", specs: ["10\" Display", "Google Assistant", "Face Match", "Built-in Camera"] },
+];
+
+const CATEGORIES = [
+  { name: "Laptops", icon: "💻", desc: "Pro & Gaming Laptops", count: PRODUCTS.filter(p => p.category === "Laptops").length, color: "#3b82f6" },
+  { name: "Smartphones", icon: "📱", desc: "iOS & Android Flagship", count: PRODUCTS.filter(p => p.category === "Smartphones").length, color: "#8b5cf6" },
+  { name: "Gaming", icon: "🎮", desc: "Gear & Peripherals", count: PRODUCTS.filter(p => p.category === "Gaming").length, color: "#ef4444" },
+  { name: "Accessories", icon: "🎧", desc: "Productivity Essentials", count: PRODUCTS.filter(p => p.category === "Accessories").length, color: "#10b981" },
+  { name: "Smart Devices", icon: "⌚", desc: "Wearables & Home AI", count: PRODUCTS.filter(p => p.category === "Smart Devices").length, color: "#f59e0b" },
+];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const Stars = ({ rating }) => {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  return (
+    <span className="flex gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} style={{ fontSize: "12px" }}>
+          {i < full ? "★" : i === full && half ? "⯨" : "☆"}
+        </span>
+      ))}
+    </span>
+  );
+};
+
+// ─── PRODUCT MODAL ────────────────────────────────────────────────────────────
+const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishlisted, darkMode }) => {
+  if (!product) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}>
+      <div className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}
+        style={{ background: darkMode ? "#1a1a2e" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+        <div className="p-8">
+          <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all"
+            style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6", color: darkMode ? "#a0a0c0" : "#6b7280" }}>×</button>
+          <div className="text-center mb-6">
+            <div className="text-8xl mb-4">{product.img}</div>
+            {product.badge && (
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: "#3b82f620", color: "#3b82f6" }}>{product.badge}</span>
+            )}
+            <h2 className="text-2xl font-bold mb-2" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{product.name}</h2>
+            <span className="text-sm px-3 py-1 rounded-full" style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6", color: darkMode ? "#a0a0c0" : "#6b7280" }}>{product.category}</span>
+          </div>
+          <p className="text-center mb-6 text-sm leading-relaxed" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>{product.desc}</p>
+          <div className="grid grid-cols-2 gap-2 mb-6">
+            {product.specs.map((s, i) => (
+              <div key={i} className="flex items-center gap-2 p-2 rounded-xl text-xs" style={{ background: darkMode ? "#0f0f1a" : "#f9fafb" }}>
+                <span style={{ color: "#3b82f6" }}>✦</span>
+                <span style={{ color: darkMode ? "#c0c0e0" : "#374151" }}>{s}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <span className="text-3xl font-bold" style={{ color: "#3b82f6" }}>${product.price.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span style={{ color: "#f59e0b" }}><Stars rating={product.rating} /></span>
+              <span className="text-sm" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>({product.reviews})</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => { onAddToCart(product); onClose(); }}
+              className="flex-1 py-3 rounded-2xl font-bold text-white transition-all hover:scale-105"
+              style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)" }}>
+              Add to Cart
+            </button>
+            <button onClick={() => onToggleWishlist(product.id)}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all hover:scale-110"
+              style={{ background: isWishlisted ? "#ef444420" : darkMode ? "#2d2d4e" : "#f3f4f6", color: isWishlisted ? "#ef4444" : darkMode ? "#a0a0c0" : "#9ca3af" }}>
+              {isWishlisted ? "❤️" : "🤍"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── PRODUCT CARD ─────────────────────────────────────────────────────────────
+const ProductCard = ({ product, onViewDetails, onAddToCart, onToggleWishlist, isWishlisted, darkMode }) => {
+  const [hovered, setHovered] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    onAddToCart(product);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+
+  return (
+    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      className="rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
+      style={{
+        background: darkMode ? "#16213e" : "#ffffff",
+        border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb",
+        transform: hovered ? "translateY(-8px)" : "translateY(0)",
+        boxShadow: hovered ? (darkMode ? "0 20px 40px rgba(59,130,246,0.2)" : "0 20px 40px rgba(0,0,0,0.12)") : "0 2px 8px rgba(0,0,0,0.06)",
+      }}>
+      <div className="relative p-6 flex flex-col items-center" style={{ background: darkMode ? "#0f0f1a" : "#f9fafb" }}>
+        {product.badge && (
+          <span className="absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-bold"
+            style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", color: "#fff" }}>{product.badge}</span>
+        )}
+        <button onClick={e => { e.stopPropagation(); onToggleWishlist(product.id); }}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-125"
+          style={{ background: isWishlisted ? "#ef444420" : darkMode ? "#2d2d4e" : "#ffffff", color: isWishlisted ? "#ef4444" : "#9ca3af" }}>
+          {isWishlisted ? "❤️" : "🤍"}
+        </button>
+        <div style={{ fontSize: "64px", lineHeight: "1", filter: hovered ? "drop-shadow(0 8px 16px rgba(59,130,246,0.4))" : "none", transition: "filter 0.3s" }}>
+          {product.img}
+        </div>
+      </div>
+      <div className="p-5">
+        <span className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: darkMode ? "#2d2d4e" : "#eff6ff", color: "#3b82f6" }}>{product.category}</span>
+        <h3 className="font-bold mt-2 mb-1 text-sm leading-snug" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{product.name}</h3>
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ color: "#f59e0b" }}><Stars rating={product.rating} /></span>
+          <span className="text-xs" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>({product.reviews})</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-bold" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>${product.price.toLocaleString()}</span>
+        </div>
+        <div className="flex gap-2 mt-3">
+          <button onClick={() => onViewDetails(product)}
+            className="flex-1 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105"
+            style={{ borderColor: "#3b82f6", color: "#3b82f6", background: "transparent" }}>
+            View Details
+          </button>
+          <button onClick={handleAdd}
+            className="flex-1 py-2 rounded-xl text-xs font-semibold text-white transition-all hover:scale-105"
+            style={{ background: added ? "#10b981" : "linear-gradient(135deg, #3b82f6, #8b5cf6)" }}>
+            {added ? "✓ Added" : "Add to Cart"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── CART SIDEBAR ─────────────────────────────────────────────────────────────
+const CartSidebar = ({ cart, onClose, onUpdateQty, onRemove, darkMode }) => {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  return (
+    <div className="fixed inset-0 z-50 flex" onClick={onClose}>
+      <div className="flex-1" />
+      <div className="w-full max-w-sm h-full flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}
+        style={{ background: darkMode ? "#1a1a2e" : "#fff", borderLeft: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: darkMode ? "#2d2d4e" : "#e5e7eb" }}>
+          <h2 className="text-xl font-bold" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Cart ({cart.length})</h2>
+          <button onClick={onClose} className="text-2xl" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>×</button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {cart.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🛒</div>
+              <p style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>Your cart is empty</p>
+            </div>
+          ) : cart.map(item => (
+            <div key={item.id} className="flex items-center gap-3 p-3 rounded-2xl"
+              style={{ background: darkMode ? "#0f0f1a" : "#f9fafb" }}>
+              <span className="text-3xl">{item.img}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{item.name}</p>
+                <p className="text-sm" style={{ color: "#3b82f6" }}>${item.price.toLocaleString()}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => onUpdateQty(item.id, -1)} className="w-6 h-6 rounded-full flex items-center justify-center text-sm"
+                  style={{ background: darkMode ? "#2d2d4e" : "#e5e7eb", color: darkMode ? "#a0a0c0" : "#374151" }}>−</button>
+                <span className="w-6 text-center text-sm font-bold" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{item.qty}</span>
+                <button onClick={() => onUpdateQty(item.id, 1)} className="w-6 h-6 rounded-full flex items-center justify-center text-sm"
+                  style={{ background: darkMode ? "#2d2d4e" : "#e5e7eb", color: darkMode ? "#a0a0c0" : "#374151" }}>+</button>
+              </div>
+              <button onClick={() => onRemove(item.id)} className="text-red-400 hover:text-red-500 text-sm">🗑</button>
+            </div>
+          ))}
+        </div>
+        {cart.length > 0 && (
+          <div className="p-6 border-t" style={{ borderColor: darkMode ? "#2d2d4e" : "#e5e7eb" }}>
+            <div className="flex justify-between mb-4">
+              <span style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>Total</span>
+              <span className="text-xl font-bold" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>${total.toLocaleString()}</span>
+            </div>
+            <button className="w-full py-3 rounded-2xl font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)" }}
+              onClick={() => alert("Checkout coming soon! 🚀")}>
+              Checkout →
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── NAVBAR ───────────────────────────────────────────────────────────────────
+const Navbar = ({ page, setPage, cartCount, wishlistCount, darkMode, setDarkMode, onCartOpen }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const links = ["Home", "Products", "Categories", "About", "Contact"];
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-40 transition-all" style={{
+      background: darkMode ? "rgba(10,10,26,0.9)" : "rgba(255,255,255,0.9)",
+      backdropFilter: "blur(20px)",
+      borderBottom: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb",
+    }}>
+      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+        <button onClick={() => setPage("Home")} className="flex items-center gap-2 font-black text-xl">
+          <span style={{ fontSize: "24px" }}>⚡</span>
+          <span style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            TECHstore
+          </span>
+        </button>
+
+        <div className="hidden md:flex items-center gap-1">
+          {links.map(l => (
+            <button key={l} onClick={() => setPage(l)}
+              className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              style={{
+                background: page === l ? "linear-gradient(135deg, #3b82f620, #8b5cf620)" : "transparent",
+                color: page === l ? "#3b82f6" : darkMode ? "#a0a0c0" : "#6b7280",
+              }}>{l}</button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button onClick={() => setDarkMode(!darkMode)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all hover:scale-110"
+            style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6" }}>
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+          <button onClick={() => setPage("wishlist")} className="relative w-9 h-9 rounded-xl flex items-center justify-center text-lg hover:scale-110 transition-all"
+            style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6" }}>
+            ❤️
+            {wishlistCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs text-white flex items-center justify-center"
+              style={{ background: "#ef4444", fontSize: "10px" }}>{wishlistCount}</span>}
+          </button>
+          <button onClick={onCartOpen} className="relative w-9 h-9 rounded-xl flex items-center justify-center text-lg hover:scale-110 transition-all"
+            style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6" }}>
+            🛒
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs text-white flex items-center justify-center"
+              style={{ background: "#3b82f6", fontSize: "10px" }}>{cartCount}</span>}
+          </button>
+          <button className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: darkMode ? "#2d2d4e" : "#f3f4f6", color: darkMode ? "#a0a0c0" : "#374151" }}
+            onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+        </div>
+      </div>
+      {menuOpen && (
+        <div className="md:hidden border-t px-4 py-3 flex flex-col gap-1"
+          style={{ borderColor: darkMode ? "#2d2d4e" : "#e5e7eb", background: darkMode ? "#0a0a1a" : "#fff" }}>
+          {links.map(l => (
+            <button key={l} onClick={() => { setPage(l); setMenuOpen(false); }}
+              className="text-left px-3 py-2 rounded-xl text-sm font-medium"
+              style={{ color: page === l ? "#3b82f6" : darkMode ? "#a0a0c0" : "#6b7280", background: page === l ? "#3b82f610" : "transparent" }}>
+              {l}
+            </button>
+          ))}
+        </div>
+      )}
+    </nav>
+  );
+};
+
+// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+const HomePage = ({ darkMode, setPage, setFilterCategory, onAddToCart, onToggleWishlist, wishlist, onViewDetails }) => {
+  const featured = PRODUCTS.filter(p => p.badge).slice(0, 4);
+  const deals = PRODUCTS.filter(p => p.price < 400).slice(0, 3);
+
+  return (
+    <div>
+      {/* Hero */}
+      <section className="relative min-h-screen flex items-center overflow-hidden" style={{
+        background: darkMode
+          ? "radial-gradient(ellipse at 20% 50%, #1e3a5f 0%, #0a0a1a 50%, #1a0a2e 100%)"
+          : "radial-gradient(ellipse at 20% 50%, #dbeafe 0%, #f9fafb 50%, #ede9fe 100%)"
+      }}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div key={i} className="absolute rounded-full opacity-20"
+              style={{
+                width: Math.random() * 6 + 2 + "px", height: Math.random() * 6 + 2 + "px",
+                background: i % 2 === 0 ? "#3b82f6" : "#8b5cf6",
+                left: Math.random() * 100 + "%", top: Math.random() * 100 + "%",
+                animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: Math.random() * 3 + "s"
+              }} />
+          ))}
+        </div>
+        <div className="max-w-7xl mx-auto px-4 py-24 grid md:grid-cols-2 gap-12 items-center w-full">
+          <div>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+              style={{ background: darkMode ? "#3b82f620" : "#dbeafe", color: "#3b82f6" }}>
+              <span>⚡</span> The Future of Tech Shopping
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black leading-none mb-6"
+              style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>
+              Next-Gen
+              <br />
+              <span style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                Technology
+              </span>
+              <br />
+              Starts Here.
+            </h1>
+            <p className="text-lg mb-8" style={{ color: darkMode ? "#a0a0c0" : "#6b7280", maxWidth: "480px" }}>
+              Discover the latest laptops, smartphones, gaming gear, and smart devices. Professional quality, student-friendly prices.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={() => setPage("Products")}
+                className="px-8 py-4 rounded-2xl font-bold text-white text-lg transition-all hover:scale-105"
+                style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", boxShadow: "0 8px 32px rgba(59,130,246,0.4)" }}>
+                Shop Now →
+              </button>
+              <button onClick={() => setPage("Categories")}
+                className="px-8 py-4 rounded-2xl font-bold border-2 text-lg transition-all hover:scale-105"
+                style={{ borderColor: "#3b82f6", color: "#3b82f6", background: "transparent" }}>
+                Browse Categories
+              </button>
+            </div>
+            <div className="flex gap-8 mt-10">
+              {[["500+", "Products"], ["50K+", "Customers"], ["4.8★", "Rating"]].map(([n, l]) => (
+                <div key={l}>
+                  <div className="text-2xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{n}</div>
+                  <div className="text-sm" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="hidden md:flex flex-wrap gap-4 justify-center items-center">
+            {PRODUCTS.slice(0, 6).map((p, i) => (
+              <div key={p.id}
+                className="w-24 h-24 rounded-3xl flex items-center justify-center text-5xl transition-all hover:scale-110 cursor-pointer"
+                style={{
+                  background: darkMode ? "#16213e" : "#ffffff",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                  animation: `floatCard ${3 + i * 0.4}s ease-in-out infinite`,
+                  animationDelay: i * 0.2 + "s",
+                  border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb",
+                }}
+                onClick={() => onViewDetails(p)}>
+                {p.img}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-20 px-4" style={{ background: darkMode ? "#0a0a1a" : "#f9fafb" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <p className="text-sm font-semibold mb-2" style={{ color: "#3b82f6" }}>✦ HANDPICKED FOR YOU</p>
+              <h2 className="text-4xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Featured Products</h2>
+            </div>
+            <button onClick={() => setPage("Products")} className="hidden md:block text-sm font-semibold px-4 py-2 rounded-xl border transition-all hover:scale-105"
+              style={{ borderColor: "#3b82f6", color: "#3b82f6" }}>View All →</button>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map(p => (
+              <ProductCard key={p.id} product={p} darkMode={darkMode} onViewDetails={onViewDetails}
+                onAddToCart={onAddToCart} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(p.id)} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Preview */}
+      <section className="py-20 px-4" style={{ background: darkMode ? "#16213e" : "#ffffff" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-sm font-semibold mb-2" style={{ color: "#8b5cf6" }}>✦ SHOP BY CATEGORY</p>
+            <h2 className="text-4xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>What Are You Looking For?</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {CATEGORIES.map(cat => (
+              <button key={cat.name} onClick={() => { setFilterCategory(cat.name); setPage("Products"); }}
+                className="p-6 rounded-3xl text-center transition-all hover:scale-105 group"
+                style={{ background: darkMode ? "#0a0a1a" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+                <div className="text-4xl mb-3">{cat.icon}</div>
+                <div className="font-bold text-sm mb-1" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{cat.name}</div>
+                <div className="text-xs" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{cat.count} items</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Deals */}
+      <section className="py-20 px-4" style={{ background: darkMode ? "#0a0a1a" : "#f9fafb" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <p className="text-sm font-semibold mb-2" style={{ color: "#ef4444" }}>🔥 LIMITED TIME</p>
+              <h2 className="text-4xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Hot Deals</h2>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {deals.map(p => (
+              <div key={p.id} className="flex items-center gap-4 p-5 rounded-3xl transition-all hover:scale-102"
+                style={{ background: darkMode ? "#16213e" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+                <div className="text-5xl flex-shrink-0">{p.img}</div>
+                <div>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ background: "#ef444420", color: "#ef4444" }}>DEAL</span>
+                  <div className="font-bold mt-1 text-sm" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{p.name}</div>
+                  <div className="text-lg font-black mt-1" style={{ color: "#3b82f6" }}>${p.price}</div>
+                  <button onClick={() => onAddToCart(p)} className="mt-2 text-xs px-3 py-1 rounded-lg text-white"
+                    style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)" }}>Add to Cart</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-16 px-4" style={{ background: darkMode ? "#0f0f1a" : "#111827" }}>
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-10">
+          <div>
+            <div className="flex items-center gap-2 font-black text-2xl mb-4">
+              <span>⚡</span>
+              <span style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>TECHstore</span>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>Your one-stop destination for the latest technology products. Premium quality, unbeatable prices.</p>
+          </div>
+          {[
+            { title: "Quick Links", links: ["Home", "Products", "Categories", "About", "Contact"] },
+            { title: "Categories", links: CATEGORIES.map(c => c.name) },
+            { title: "Contact", links: ["📧 hello@techstore.com", "📞 +1 (555) 123-4567", "📍 123 Tech Avenue, Silicon Valley", "🌐 www.techstore.com"] },
+          ].map(col => (
+            <div key={col.title}>
+              <h4 className="font-bold mb-4 text-sm" style={{ color: "#e2e8f0" }}>{col.title}</h4>
+              <div className="flex flex-col gap-2">
+                {col.links.map(l => (
+                  <span key={l} className="text-sm" style={{ color: "#6b7280" }}>{l}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="max-w-7xl mx-auto border-t mt-10 pt-6 flex justify-between items-center flex-wrap gap-4"
+          style={{ borderColor: "#1f2937" }}>
+          <p className="text-sm" style={{ color: "#6b7280" }}>© 2025 TECHstore. All rights reserved.</p>
+          <div className="flex gap-4">
+            {["𝕏", "📘", "📸", "▶️"].map(icon => (
+              <span key={icon} className="text-xl cursor-pointer hover:opacity-75 transition-opacity">{icon}</span>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// ─── PRODUCTS PAGE ────────────────────────────────────────────────────────────
+const ProductsPage = ({ darkMode, onAddToCart, onToggleWishlist, wishlist, onViewDetails, filterCategory, setFilterCategory }) => {
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("default");
+
+  const filtered = useMemo(() => {
+    let p = [...PRODUCTS];
+    if (filterCategory !== "All") p = p.filter(x => x.category === filterCategory);
+    if (search) p = p.filter(x => x.name.toLowerCase().includes(search.toLowerCase()) || x.category.toLowerCase().includes(search.toLowerCase()));
+    if (sort === "low") p.sort((a, b) => a.price - b.price);
+    if (sort === "high") p.sort((a, b) => b.price - a.price);
+    if (sort === "rating") p.sort((a, b) => b.rating - a.rating);
+    return p;
+  }, [filterCategory, search, sort]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-24">
+      <div className="mb-10">
+        <p className="text-sm font-semibold mb-1" style={{ color: "#3b82f6" }}>✦ BROWSE</p>
+        <h1 className="text-5xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>All Products</h1>
+        <p className="mt-2 text-sm" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{filtered.length} products found</p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex-1 relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🔍</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products..."
+            className="w-full pl-12 pr-4 py-3 rounded-2xl text-sm outline-none"
+            style={{ background: darkMode ? "#16213e" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb", color: darkMode ? "#e2e8f0" : "#111827" }} />
+        </div>
+        <select value={sort} onChange={e => setSort(e.target.value)}
+          className="px-4 py-3 rounded-2xl text-sm outline-none cursor-pointer"
+          style={{ background: darkMode ? "#16213e" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb", color: darkMode ? "#e2e8f0" : "#111827" }}>
+          <option value="default">Sort: Default</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+
+      {/* Category Tabs */}
+      <div className="flex gap-2 flex-wrap mb-8">
+        {["All", ...CATEGORIES.map(c => c.name)].map(cat => (
+          <button key={cat} onClick={() => setFilterCategory(cat)}
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105"
+            style={{
+              background: filterCategory === cat ? "linear-gradient(135deg, #3b82f6, #8b5cf6)" : darkMode ? "#16213e" : "#f3f4f6",
+              color: filterCategory === cat ? "#fff" : darkMode ? "#a0a0c0" : "#6b7280",
+              border: filterCategory === cat ? "none" : darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb",
+            }}>{cat}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-24">
+          <div className="text-7xl mb-4">🔍</div>
+          <h3 className="text-xl font-bold mb-2" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>No products found</h3>
+          <p style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>Try a different search or category</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filtered.map(p => (
+            <ProductCard key={p.id} product={p} darkMode={darkMode} onViewDetails={onViewDetails}
+              onAddToCart={onAddToCart} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(p.id)} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── CATEGORIES PAGE ──────────────────────────────────────────────────────────
+const CategoriesPage = ({ darkMode, setPage, setFilterCategory, onAddToCart, onToggleWishlist, wishlist, onViewDetails }) => {
+  const [active, setActive] = useState(null);
+  const catProducts = active ? PRODUCTS.filter(p => p.category === active) : [];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-24">
+      <div className="mb-10">
+        <p className="text-sm font-semibold mb-1" style={{ color: "#8b5cf6" }}>✦ EXPLORE</p>
+        <h1 className="text-5xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Categories</h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
+        {CATEGORIES.map(cat => (
+          <button key={cat.name} onClick={() => setActive(active === cat.name ? null : cat.name)}
+            className="p-6 rounded-3xl text-center transition-all hover:scale-105"
+            style={{
+              background: active === cat.name ? `linear-gradient(135deg, ${cat.color}30, ${cat.color}10)` : darkMode ? "#16213e" : "#f9fafb",
+              border: active === cat.name ? `2px solid ${cat.color}` : darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb",
+            }}>
+            <div className="text-4xl mb-3">{cat.icon}</div>
+            <div className="font-bold text-sm mb-1" style={{ color: active === cat.name ? cat.color : darkMode ? "#e2e8f0" : "#111827" }}>{cat.name}</div>
+            <div className="text-xs" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{cat.count} products</div>
+            <div className="text-xs mt-1" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{cat.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {active && (
+        <div>
+          <h2 className="text-2xl font-bold mb-6" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>
+            {CATEGORIES.find(c => c.name === active)?.icon} {active}
+            <span className="ml-2 text-base font-normal" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>({catProducts.length} products)</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {catProducts.map(p => (
+              <ProductCard key={p.id} product={p} darkMode={darkMode} onViewDetails={onViewDetails}
+                onAddToCart={onAddToCart} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(p.id)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!active && (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">👆</div>
+          <p style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>Select a category above to browse products</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── ABOUT PAGE ───────────────────────────────────────────────────────────────
+const AboutPage = ({ darkMode }) => {
+  const stats = [["2020", "Founded"], ["500+", "Products"], ["50K+", "Customers"], ["15+", "Brands"]];
+  const values = [
+    { icon: "🚀", title: "Innovation First", desc: "We curate only the most cutting-edge technology products from the world's leading brands." },
+    { icon: "💎", title: "Premium Quality", desc: "Every product is verified for authenticity and quality before it reaches our shelves." },
+    { icon: "🎓", title: "Student-Focused", desc: "We understand student budgets. Great deals without compromising on quality." },
+    { icon: "🌍", title: "Sustainability", desc: "Committed to reducing e-waste through responsible packaging and trade-in programs." },
+  ];
+  return (
+    <div>
+      <div className="py-32 px-4 text-center" style={{
+        background: darkMode
+          ? "radial-gradient(ellipse at center, #1e3a5f 0%, #0a0a1a 100%)"
+          : "radial-gradient(ellipse at center, #dbeafe 0%, #f9fafb 100%)"
+      }}>
+        <span className="inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6" style={{ background: "#3b82f620", color: "#3b82f6" }}>Our Story</span>
+        <h1 className="text-6xl font-black mb-6" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>
+          About <span style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>TECHstore</span>
+        </h1>
+        <p className="text-lg max-w-2xl mx-auto" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>
+          Born out of a passion for technology and a desire to make premium tech accessible to students and professionals alike.
+        </p>
+      </div>
+
+      <div className="py-20 px-4" style={{ background: darkMode ? "#0a0a1a" : "#ffffff" }}>
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <p className="text-sm font-semibold mb-2" style={{ color: "#3b82f6" }}>✦ OUR MISSION</p>
+            <h2 className="text-4xl font-black mb-6" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Empowering The Next Generation of Tech Users</h2>
+            <p className="leading-relaxed mb-4" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>
+              TECHstore was founded in 2020 with a simple vision: make the latest technology accessible without the premium markup. We started as a small online store in Silicon Valley and have grown to serve over 50,000 customers worldwide.
+            </p>
+            <p className="leading-relaxed" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>
+              Our team of tech enthusiasts personally tests every product, ensuring you get honest recommendations and the best value for your money. Whether you're a student, professional, or tech enthusiast — TECHstore has something for you.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {stats.map(([n, l]) => (
+              <div key={l} className="p-8 rounded-3xl text-center" style={{ background: darkMode ? "#16213e" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+                <div className="text-4xl font-black mb-2" style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{n}</div>
+                <div className="text-sm" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="py-20 px-4" style={{ background: darkMode ? "#16213e" : "#f9fafb" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-sm font-semibold mb-2" style={{ color: "#8b5cf6" }}>✦ WHAT DRIVES US</p>
+            <h2 className="text-4xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Our Core Values</h2>
+          </div>
+          <div className="grid md:grid-cols-4 gap-6">
+            {values.map(v => (
+              <div key={v.title} className="p-6 rounded-3xl" style={{ background: darkMode ? "#0a0a1a" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+                <div className="text-4xl mb-4">{v.icon}</div>
+                <h3 className="font-bold mb-2" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{v.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="py-20 px-4" style={{ background: darkMode ? "#0a0a1a" : "#ffffff" }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-sm font-semibold mb-2" style={{ color: "#10b981" }}>✦ FIND US</p>
+          <h2 className="text-4xl font-black mb-8" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Our Location</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[["📍", "Address", "123 Tech Avenue\nSilicon Valley, CA 94025"], ["📅", "Established", "Founded in 2020\nStudent Project"], ["⏰", "Hours", "Mon–Fri: 9AM–8PM\nSat–Sun: 10AM–6PM"]].map(([icon, title, info]) => (
+              <div key={title} className="p-6 rounded-3xl" style={{ background: darkMode ? "#16213e" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+                <div className="text-3xl mb-3">{icon}</div>
+                <div className="font-bold mb-1" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>{title}</div>
+                <div className="text-sm whitespace-pre-line" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>{info}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── CONTACT PAGE ─────────────────────────────────────────────────────────────
+const ContactPage = ({ darkMode }) => {
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = () => {
+    if (!form.name || !form.email || !form.message) return alert("Please fill in all required fields.");
+    setSent(true);
+    setTimeout(() => setSent(false), 4000);
+    setForm({ name: "", email: "", subject: "", message: "" });
+  };
+
+  const inputStyle = { background: darkMode ? "#16213e" : "#f9fafb", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb", color: darkMode ? "#e2e8f0" : "#111827" };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-24">
+      <div className="mb-12">
+        <p className="text-sm font-semibold mb-1" style={{ color: "#10b981" }}>✦ REACH OUT</p>
+        <h1 className="text-5xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Contact Us</h1>
+        <p className="mt-2" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>We'd love to hear from you. Send us a message!</p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          {sent && (
+            <div className="mb-6 p-4 rounded-2xl text-center font-semibold" style={{ background: "#10b98120", color: "#10b981", border: "1px solid #10b98140" }}>
+              ✅ Message sent! We'll get back to you within 24 hours.
+            </div>
+          )}
+          <div className="p-8 rounded-3xl" style={{ background: darkMode ? "#16213e" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? "#a0a0c0" : "#374151" }}>Name *</label>
+                <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name"
+                  className="w-full px-4 py-3 rounded-2xl text-sm outline-none" style={inputStyle} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? "#a0a0c0" : "#374151" }}>Email *</label>
+                <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="your@email.com" type="email"
+                  className="w-full px-4 py-3 rounded-2xl text-sm outline-none" style={inputStyle} />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? "#a0a0c0" : "#374151" }}>Subject</label>
+              <input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder="How can we help?"
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none" style={inputStyle} />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? "#a0a0c0" : "#374151" }}>Message *</label>
+              <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Write your message here..." rows={5}
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none resize-none" style={inputStyle} />
+            </div>
+            <button onClick={handleSubmit}
+              className="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all hover:scale-105"
+              style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", boxShadow: "0 8px 24px rgba(59,130,246,0.3)" }}>
+              Send Message →
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {[
+            { icon: "📧", title: "Email", info: "hello@techstore.com\nsupport@techstore.com", color: "#3b82f6" },
+            { icon: "📞", title: "Phone", info: "+1 (555) 123-4567\nMon–Fri 9AM–8PM", color: "#8b5cf6" },
+            { icon: "📍", title: "Address", info: "123 Tech Avenue\nSilicon Valley, CA 94025", color: "#10b981" },
+          ].map(c => (
+            <div key={c.title} className="p-6 rounded-3xl" style={{ background: darkMode ? "#16213e" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl">{c.icon}</span>
+                <span className="font-bold" style={{ color: c.color }}>{c.title}</span>
+              </div>
+              <p className="text-sm whitespace-pre-line" style={{ color: darkMode ? "#a0a0c0" : "#6b7280" }}>{c.info}</p>
+            </div>
+          ))}
+          <div className="p-6 rounded-3xl" style={{ background: darkMode ? "#16213e" : "#ffffff", border: darkMode ? "1px solid #2d2d4e" : "1px solid #e5e7eb" }}>
+            <div className="font-bold mb-4" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Follow Us</div>
+            <div className="flex gap-3">
+              {[["𝕏", "Twitter"], ["📘", "Facebook"], ["📸", "Instagram"], ["▶️", "YouTube"]].map(([icon, name]) => (
+                <button key={name} title={name}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all hover:scale-110"
+                  style={{ background: darkMode ? "#0a0a1a" : "#f3f4f6" }}>
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="p-4 rounded-3xl text-center text-sm font-semibold" style={{ background: "linear-gradient(135deg, #3b82f620, #8b5cf620)", color: "#3b82f6", border: "1px dashed #3b82f640" }}>
+            🗺️ Map Embed Available<br /><span className="text-xs font-normal" style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>Google Maps integration ready</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── WISHLIST PAGE ────────────────────────────────────────────────────────────
+const WishlistPage = ({ darkMode, wishlist, onToggleWishlist, onAddToCart, onViewDetails }) => {
+  const items = PRODUCTS.filter(p => wishlist.includes(p.id));
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-24">
+      <div className="mb-10">
+        <p className="text-sm font-semibold mb-1" style={{ color: "#ef4444" }}>❤️ SAVED</p>
+        <h1 className="text-5xl font-black" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>Wishlist</h1>
+      </div>
+      {items.length === 0 ? (
+        <div className="text-center py-24">
+          <div className="text-7xl mb-4">🤍</div>
+          <h3 className="text-xl font-bold mb-2" style={{ color: darkMode ? "#e2e8f0" : "#111827" }}>No saved items yet</h3>
+          <p style={{ color: darkMode ? "#6b7280" : "#9ca3af" }}>Heart products you love to save them here</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {items.map(p => (
+            <ProductCard key={p.id} product={p} darkMode={darkMode} onViewDetails={onViewDetails}
+              onAddToCart={onAddToCart} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(p.id)} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [page, setPage] = useState("Home");
+  const [darkMode, setDarkMode] = useState(true);
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("All");
+  const [modalProduct, setModalProduct] = useState(null);
+
+  const addToCart = (product) => {
+    setCart(prev => {
+      const ex = prev.find(i => i.id === product.id);
+      return ex ? prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...product, qty: 1 }];
+    });
+  };
+
+  const updateQty = (id, delta) => {
+    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+  };
+
+  const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
+
+  const toggleWishlist = (id) => {
+    setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  const bgColor = darkMode ? "#0a0a1a" : "#f9fafb";
+
+  return (
+    <div style={{ background: bgColor, minHeight: "100vh", fontFamily: "'Sora', 'DM Sans', system-ui, sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&display=swap');
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        @keyframes floatCard { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(1deg)} }
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b82f640; border-radius: 3px; }
+        input::placeholder, textarea::placeholder { color: #6b7280; }
+      `}</style>
+
+      <Navbar page={page} setPage={setPage} cartCount={cartCount} wishlistCount={wishlist.length}
+        darkMode={darkMode} setDarkMode={setDarkMode} onCartOpen={() => setCartOpen(true)} />
+
+      <div style={{ paddingTop: page === "Home" ? "0" : "0" }}>
+        {page === "Home" && <HomePage darkMode={darkMode} setPage={setPage} setFilterCategory={setFilterCategory}
+          onAddToCart={addToCart} onToggleWishlist={toggleWishlist} wishlist={wishlist} onViewDetails={setModalProduct} />}
+        {page === "Products" && <ProductsPage darkMode={darkMode} onAddToCart={addToCart} onToggleWishlist={toggleWishlist}
+          wishlist={wishlist} onViewDetails={setModalProduct} filterCategory={filterCategory} setFilterCategory={setFilterCategory} />}
+        {page === "Categories" && <CategoriesPage darkMode={darkMode} setPage={setPage} setFilterCategory={setFilterCategory}
+          onAddToCart={addToCart} onToggleWishlist={toggleWishlist} wishlist={wishlist} onViewDetails={setModalProduct} />}
+        {page === "About" && <AboutPage darkMode={darkMode} />}
+        {page === "Contact" && <ContactPage darkMode={darkMode} />}
+        {page === "wishlist" && <WishlistPage darkMode={darkMode} wishlist={wishlist}
+          onToggleWishlist={toggleWishlist} onAddToCart={addToCart} onViewDetails={setModalProduct} />}
+      </div>
+
+      {cartOpen && <CartSidebar cart={cart} onClose={() => setCartOpen(false)} onUpdateQty={updateQty} onRemove={removeFromCart} darkMode={darkMode} />}
+
+      <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} onAddToCart={addToCart}
+        onToggleWishlist={toggleWishlist} isWishlisted={modalProduct ? wishlist.includes(modalProduct.id) : false} darkMode={darkMode} />
+    </div>
+  );
+}
