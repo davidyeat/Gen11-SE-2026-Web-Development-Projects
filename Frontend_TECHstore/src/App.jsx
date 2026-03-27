@@ -6,7 +6,7 @@ import ProductSection from "./sections/ProductSection.jsx";
 import ProductShowcase from "./components/ProductShowcase.jsx";
 
 function App() {
-  const [, setPage] = useState("home");
+  const [page, setPage] = useState("home");
 
   return (
     <>
@@ -15,8 +15,7 @@ function App() {
         {/* Content will go here based on the page state */}
         <Home />
         <FlashSale />
-        {/* <ProductSection /> */}
-        {/* <ProductShowcase /> */}
+        <ProductSection />
       </main>
     </>
   );

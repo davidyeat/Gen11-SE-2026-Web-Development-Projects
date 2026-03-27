@@ -8,16 +8,16 @@ const StarRating = ({ rating }) => {
         const half = !filled && rating >= s - 0.5;
 
         return filled ? (
-          <Star 
+          <Star strokeWidth={1.25}
             key={s} 
             className="w-3.5 h-3.5 text-amber-300 fill-amber-300" 
           />
         ) : half ? (
-          <StarHalf  
+          <StarHalf strokeWidth={1.25}
             key={s} 
             className="w-3.5 h-3.5 text-amber-300 fill-amber-300" 
           />) : (
-          <Star 
+          <Star strokeWidth={1.25}
             key={s} 
             className="w-3.5 h-3.5 text-gray-300" 
           />

@@ -3,7 +3,7 @@ import { DEMO_PRODUCTS } from "../data/demoData";
 
 const FlashCartList = () => {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mx-auto max-w-7xl" aria-label="Flash Sale Cart List">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mx-auto max-w-7xl" aria-label="Flash Sale Cart List">
       {/* Product details will go here */}
       {DEMO_PRODUCTS.map((cart) => (
         <FlashCartProduct
@@ -19,7 +19,7 @@ const FlashCartList = () => {
           specs={cart.specs}
           stock={cart.stock}
         />
-      ))};
+      ))}
     </div>
   );
 };
