@@ -278,3 +278,42 @@ export const BEST_SELLERS = [
     sales: 7654,
   },
 ];
+
+/* ─── Categories Data ───────────────────────────────────────────────── */
+export const CATEGORIES = [
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/smartphone.png",
+    name: "Smartphone",
+    quantity: 127
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/laptop.png", 
+    name: "Laptop",
+    quantity: 284
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/desktop.png",
+    name: "Desktop",
+    quantity: 89
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/monitor.png",
+    name: "Monitor",
+    quantity: 43
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/printer.png",
+    name: "Printer",
+    quantity: 67
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/projector-1774678454.png",
+    name: "Projector",
+    quantity: 92
+  },
+  {
+    image: "https://www.techlandbd.com/storage/cbs/uploads/categories-featured/power-supply.png",
+    name: "Power Supply",
+    quantity: 234
+  },
+];
